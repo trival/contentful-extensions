@@ -1,0 +1,6 @@
+{
+  "id": "event-title",
+  "name": "Event title",
+  "srcdoc": "./index.built.html",
+  "fieldTypes": ["Symbol", "Text"]
+}
