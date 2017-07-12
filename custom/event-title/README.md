@@ -1,11 +1,7 @@
 Slug Generator
 --------------
 
-![slug-widget](http://contentful.github.io/extensions/assets/slug-widget.png)
-
-This extension enables to generate a slug using the title of the entry.
-It also checks whether or not any duplicates across the other entries of the
-same content type exist to warn users before publishing.
+This extension enables to generate a field that automatically fills with a date and optional place data
 
 **Note**: In order to prevent publication whenever another entry has the same
 value for the field, it is advised to use the "Uniqueness" validation constraint.

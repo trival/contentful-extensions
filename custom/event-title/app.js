@@ -1,83 +1,59 @@
-// import { init } from '../../lib/api'
 const cfExt = window.contentfulExtension || window.contentfulWidget
+
+const monthNames = [
+  "Januar", "Februar", "März",
+  "April", "Mai", "Juni", "Juli",
+  "August", "September", "Oktober",
+  "November", "Dezember"
+]
 
 
 cfExt.init(api => {
-  const slugField = api.field
+  const titleField = api.field
   const dateField = api.entry.fields.date
   const placeField = api.entry.fields.place
 
-  const input = document.getElementById('slug')
-  const statusElements = {
-    error: document.getElementById('error'),
-    ok: document.getElementById('ok'),
-    loading: document.getElementById('loading')
-  }
+  const input = document.getElementById('event-title')
 
   api.window.updateHeight()
 
-  dateField.onValueChanged(handleSlugChange)
-  placeField.onValueChanged(handleSlugChange)
+  let date = dateField.getValue()
+  let place = placeField.getValue()
 
-  input.addEventListener('input', () => handleSlugChange(input.value))
-  input.addEventListener('change', () => handleSlugChange(input.value))
+  dateField.onValueChanged(val => {
+    date = val
+    setTitle()
+  })
+  placeField.onValueChanged(val => {
+    place = val
+    setTitle()
+  })
 
-  updateStatus(slugField.getValue())
-
-  /**
-   * Set the input value to 'slug' and update the status by checking for
-   * duplicates.
-   */
-  function setTitle (slug) {
-    input.value = slug
-    slugField.setValue(slug)
-    setStatus('loading')
-  }
-
-  /**
-   * Show inline status icon based on current status
-   */
-  function updateStatus (slug) {
-    getDuplicates(slug).then(function (hasDuplicates) {
-      if (hasDuplicates) {
-        setStatus('error')
-      } else {
-        setStatus('ok')
-      }
-    })
-  }
-
-  /**
-   * Show icon for given status
-   */
-  function setStatus (status) {
-    _.each(statusElements, function (el, name) {
-      if (name === status) {
-        el.style.display = 'inline'
-      } else {
-        el.style.display = 'none'
-      }
-    })
-  }
-
-
-  /**
-   * Check if slug is already in use.
-   * Resolves to 'true' if there are entries of the given content type that have
-   * the same 'slug' value.
-   */
-  function getDuplicates (slug) {
-    if (!slug) {
-      return Promise.resolve(false)
+  function setTitle () {
+    let value = formatDate(date) + (place ? ' - ' + place : '')
+    value = value.substr(0, 254)
+    input.value = value
+    if (value != titleField.getValue()) {
+      console.log('Old Title', titleField.getValue())
+      console.log('New Title', value)
+      titleField.setValue(value)
     }
-
-    let query = {}
-
-    query['content_type'] = api.entry.getSys().contentType.sys.id
-    query['fields.' + slugField.id] = slug
-    query['sys.id[ne]'] = api.entry.getSys().id
-    query['sys.publishedAt[exists]'] = true
-
-    return api.space.getEntries(query).then(result => result.total > 0)
   }
+
+  function pad (num) {
+    return ('0' + num).slice(-2)
+  }
+
+  function formatDate (dateStr) {
+    const date = new Date(dateStr)
+
+    const day = pad(date.getDate())
+    const monthIndex = date.getMonth()
+    const year = date.getFullYear()
+    const hours = pad(date.getHours())
+    const minutes = pad(date.getMinutes())
+
+    return day + '. ' + monthNames[monthIndex] + ' ' + year + ' - ' + hours + ':' + minutes
+  }
+
 })
